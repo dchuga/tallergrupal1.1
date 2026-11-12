@@ -1,6 +1,8 @@
 package ec.edu.espe.gimnasio_api.controller;
 
+import ec.edu.espe.gimnasio_api.dto.ClienteDTO;
 import ec.edu.espe.gimnasio_api.dto.PlanDTO;
+import ec.edu.espe.gimnasio_api.service.PlanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

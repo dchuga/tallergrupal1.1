@@ -1,5 +1,6 @@
 package ec.edu.espe.gimnasio_api.controller;
 
+import ec.edu.espe.gimnasio_api.dto.PlanDTO;
 import ec.edu.espe.gimnasio_api.dto.AsistenciaDTO;
 import ec.edu.espe.gimnasio_api.service.AsistenciaService;
 import jakarta.validation.Valid;

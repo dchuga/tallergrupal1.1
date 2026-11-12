@@ -1,5 +1,6 @@
 package ec.edu.espe.gimnasio_api.service;
 
+import ec.edu.espe.gimnasio_api.dto.ClienteDTO;
 import java.util.List;
 
 public interface ClienteService {

@@ -1,4 +1,4 @@
-package ec.edu.espe.gimnasio_api.controller;
+package ec.edu.espe.gimnasio_api.dto;
 
 import java.time.LocalDate;
 
