@@ -37,7 +37,7 @@ public class PlanServiceImpl implements PlanService {
         String nombre = dto.getNombre().trim();
 
         // Regla: no pueden existir dos planes con el mismo nombre
-        if (planRepository.existsByNombreIgnoreCase(nombre)) {
+        if (planRepository.existsByNombre(nombre)) {
             throw new ReglaNegocioException("Ya existe un plan con el nombre '" + nombre + "'");
         }
         validarPrecio(dto.getPrecio());
@@ -46,6 +46,7 @@ public class PlanServiceImpl implements PlanService {
         plan.setNombre(nombre);
         plan.setPrecio(dto.getPrecio());
         plan.setDuracionDias(dto.getDuracionDias());
+        plan.setActivo(true);
 
         return aDTO(planRepository.save(plan));
     }

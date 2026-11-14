@@ -60,7 +60,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         // Regla: solo un ingreso por cliente por día
         LocalDateTime inicioDia = ingreso.toLocalDate().atStartOfDay();
         LocalDateTime finDia = inicioDia.plusDays(1).minusNanos(1);
-        if (asistenciaRepository.existsByClienteIdAndFechaHoraIngresoBetween(cliente.getId(), inicioDia, finDia)) {
+        if (!asistenciaRepository.buscarEnRango(cliente.getId(), inicioDia, finDia).isEmpty()) {
             throw new ReglaNegocioException(
                     "El cliente " + cliente.getNombre() + " ya registró su asistencia el " + ingreso.toLocalDate());
         }

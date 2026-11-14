@@ -6,7 +6,6 @@ import ec.edu.espe.gimnasio_api.entity.Entrenador;
 import ec.edu.espe.gimnasio_api.entity.Plan;
 import ec.edu.espe.gimnasio_api.exception.RecursoNoEncontradoException;
 import ec.edu.espe.gimnasio_api.exception.ReglaNegocioException;
-import ec.edu.espe.gimnasio_api.repository.AsistenciaRepository;
 import ec.edu.espe.gimnasio_api.repository.ClienteRepository;
 import ec.edu.espe.gimnasio_api.repository.EntrenadorRepository;
 import ec.edu.espe.gimnasio_api.repository.PlanRepository;
@@ -24,16 +23,13 @@ public class ClienteServiceImpl implements ClienteService {
     private final ClienteRepository clienteRepository;
     private final PlanRepository planRepository;
     private final EntrenadorRepository entrenadorRepository;
-    private final AsistenciaRepository asistenciaRepository;
 
     public ClienteServiceImpl(ClienteRepository clienteRepository,
                               PlanRepository planRepository,
-                              EntrenadorRepository entrenadorRepository,
-                              AsistenciaRepository asistenciaRepository) {
+                              EntrenadorRepository entrenadorRepository) {
         this.clienteRepository = clienteRepository;
         this.planRepository = planRepository;
         this.entrenadorRepository = entrenadorRepository;
-        this.asistenciaRepository = asistenciaRepository;
     }
 
     @Override
@@ -68,11 +64,12 @@ public class ClienteServiceImpl implements ClienteService {
         if (clienteRepository.existsByCedula(cedula)) {
             throw new ReglaNegocioException("Ya existe un cliente registrado con la cédula " + cedula);
         }
-        if (clienteRepository.existsByEmailIgnoreCase(email)) {
+        if (clienteRepository.existsByEmail(email)) {
             throw new ReglaNegocioException("Ya existe un cliente registrado con el email " + email);
         }
 
         Plan plan = buscarPlan(dto.getPlanId());
+        validarPlanActivo(plan);
 
         Cliente cliente = new Cliente();
         cliente.setCedula(cedula);
@@ -102,12 +99,15 @@ public class ClienteServiceImpl implements ClienteService {
         if (clienteRepository.existsByCedulaAndIdNot(cedula, id)) {
             throw new ReglaNegocioException("La cédula " + cedula + " ya pertenece a otro cliente");
         }
-        if (clienteRepository.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+        if (clienteRepository.existsByEmailAndIdNot(email, id)) {
             throw new ReglaNegocioException("El email " + email + " ya pertenece a otro cliente");
         }
 
         Plan planNuevo = buscarPlan(dto.getPlanId());
         boolean cambioDePlan = !Objects.equals(cliente.getPlan().getId(), planNuevo.getId());
+        if (cambioDePlan) {
+            validarPlanActivo(planNuevo);
+        }
 
         cliente.setCedula(cedula);
         cliente.setNombre(dto.getNombre().trim());
@@ -129,12 +129,7 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public void eliminar(Long id) {
         Cliente cliente = buscarCliente(id);
-
-        // Regla: se conserva el historial; un cliente con asistencias no se borra
-        if (asistenciaRepository.existsByClienteId(id)) {
-            throw new ReglaNegocioException(
-                    "No se puede eliminar al cliente " + cliente.getNombre() + " porque tiene asistencias registradas");
-        }
+        // Las asistencias del cliente se eliminan en cascada (CascadeType.REMOVE en la entidad Cliente)
         clienteRepository.delete(cliente);
     }
 
@@ -156,6 +151,12 @@ public class ClienteServiceImpl implements ClienteService {
         }
         return entrenadorRepository.findById(entrenadorId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No existe un entrenador con id " + entrenadorId));
+    }
+
+    private void validarPlanActivo(Plan plan) {
+        if (!Boolean.TRUE.equals(plan.getActivo())) {
+            throw new ReglaNegocioException("El plan '" + plan.getNombre() + "' no está activo y no admite nuevas inscripciones");
+        }
     }
 
     private LocalDate calcularVencimiento(Plan plan) {
