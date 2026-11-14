@@ -70,6 +70,14 @@ Desarrollo de una API empresarial con arquitectura N capas para administrar la o
 
 | `POST` | `/api/asistencias` | Registrar asistencia validando vigencia de membresía |
 
+| `GET` | `/api/entrenadores` | Listar entrenadores |
+
+| `GET` | `/api/entrenadores/{id}` | Consultar entrenador por identificador |
+
+| `POST` | `/api/entrenadores` | Registrar un nuevo entrenador |
+
+| `GET` | `/api/entrenadores/{id}/clientes` | Consultar clientes asignados a un entrenador |
+
 
 
 \## Ejecución del Proyecto
